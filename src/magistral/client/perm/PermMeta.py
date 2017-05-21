@@ -16,16 +16,16 @@ class PermMeta():
         return self._topic
     
     def channels(self):
-        return self._perms.keys()
+        return list(self._perms.keys())
     
     def readable(self, channel):
-        if (self._perms == None or self._perms.has_key(channel) == False): 
+        if (self._perms == None or (channel in self._perms) == False): 
             return False
         else:
             return self._perms[channel][0]
     
     def writable(self, channel):
-        if (self._perms == None or self._perms.has_key(channel) == False): 
+        if (self._perms == None or (channel in self._perms) == False): 
             return False
         else:
             return self._perms[channel][1]

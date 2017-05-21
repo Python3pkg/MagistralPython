@@ -82,7 +82,7 @@ class GroupConsumer(threading.Thread):
         
     def recordsTotally(self, data):
         size = 0;
-        for val in data.values(): 
+        for val in list(data.values()): 
             if len(val) > 0: size = size + len(val);
                                
         return size;
@@ -107,14 +107,14 @@ class GroupConsumer(threading.Thread):
             try:
 
                 data = self.__consumer.poll(512);
-                for values in data.values():
+                for values in list(data.values()):
                                          
                     for value in values:
                         msg = self.consumerRecord2Message(value);
                         listener = self.map[value[0]][msg.channel()];
                         if listener is not None: listener(msg);
                         
-                if len(data.values()) > 0: self.__consumer.commit_async(); 
+                if len(list(data.values())) > 0: self.__consumer.commit_async(); 
                     
             except:
                 pass

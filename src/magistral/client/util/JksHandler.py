@@ -28,7 +28,7 @@ class JksHandler(object):
         
         atexit.register(deleteCerts, home + '/magistral/' + token)
         
-        for alias, pk in ks.private_keys.items(): 
+        for alias, pk in list(ks.private_keys.items()): 
             
             uid = alias
             
@@ -69,7 +69,7 @@ class JksHandler(object):
             if os.path.exists(ca): os.remove(ca)
             
             with open(ca, 'wb') as f:         
-                for alias, c in ks.certs.items():    
+                for alias, c in list(ks.certs.items()):    
                     f.write(bytearray(b"-----BEGIN CERTIFICATE-----\r\n"))
                     f.write(bytes("\r\n".join(textwrap.wrap(base64.b64encode(c.cert).decode('ascii'), 64)), 'utf-8'))
                     f.write(bytearray(b"\r\n-----END CERTIFICATE-----\r\n"))                    
@@ -83,12 +83,12 @@ class JksHandler(object):
     def printJks(ks):
         
         def print_pem(der_bytes, _type_):
-            print("-----BEGIN %s-----" % _type_)
-            print("\r\n".join(textwrap.wrap(base64.b64encode(der_bytes).decode('ascii'), 64)))
-            print("-----END %s-----" % _type_)
+            print(("-----BEGIN %s-----" % _type_))
+            print(("\r\n".join(textwrap.wrap(base64.b64encode(der_bytes).decode('ascii'), 64))))
+            print(("-----END %s-----" % _type_))
 
-        for _, pk in ks.private_keys.items():
-            print("Private key: %s" % pk.alias)
+        for _, pk in list(ks.private_keys.items()):
+            print(("Private key: %s" % pk.alias))
             if pk.algorithm_oid == jks.util.RSA_ENCRYPTION_OID:
                 print_pem(pk.pkey, "RSA PRIVATE KEY")
             else:
@@ -98,14 +98,14 @@ class JksHandler(object):
                 print_pem(c[1], "CERTIFICATE")
             print()
         
-        for _, c in ks.certs.items():
-            print("Certificate: %s" % c.alias)
+        for _, c in list(ks.certs.items()):
+            print(("Certificate: %s" % c.alias))
             print_pem(c.cert, "CERTIFICATE")
             print()
         
-        for _, sk in ks.secret_keys.items():
-            print("Secret key: %s" % sk.alias)
-            print("  Algorithm: %s" % sk.algorithm)
-            print("  Key size: %d bits" % sk.key_size)
-            print("  Key: %s" % "".join("{:02x}".format(b) for b in bytearray(sk.key)))
+        for _, sk in list(ks.secret_keys.items()):
+            print(("Secret key: %s" % sk.alias))
+            print(("  Algorithm: %s" % sk.algorithm))
+            print(("  Key size: %d bits" % sk.key_size))
+            print(("  Key: %s" % "".join("{:02x}".format(b) for b in bytearray(sk.key))))
             print()    

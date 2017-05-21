@@ -10,28 +10,29 @@ import time
 import base64
 import logging
 import paho.mqtt.client as mqtt
-from magistral.client.util.JksHandler import JksHandler
+from .magistral.client.util.JksHandler import JksHandler
 
 from os.path import expanduser, os
 
-from magistral.client.IAccessControl import IAccessControl
-from magistral.client.IMagistral import IMagistral
-from magistral.client.util.RestApiManager import RestApiManager
-from magistral.client.util.JsonConverter import JsonConverter
-from magistral.client.sub.GroupConsumer import GroupConsumer
-from magistral.client.sub.SubMeta import SubMeta
-from magistral.client.topics.TopicMeta import TopicMeta
-from magistral.client.MagistralException import MagistralException
+from .magistral.client.IAccessControl import IAccessControl
+from .magistral.client.IMagistral import IMagistral
+from .magistral.client.util.RestApiManager import RestApiManager
+from .magistral.client.util.JsonConverter import JsonConverter
+from .magistral.client.sub.GroupConsumer import GroupConsumer
+from .magistral.client.sub.SubMeta import SubMeta
+from .magistral.client.topics.TopicMeta import TopicMeta
+from .magistral.client.MagistralException import MagistralException
 
 from kafka.producer.future import RecordMetadata
-from magistral.client.pub.PubMeta import PubMeta
-from magistral.client.IHistory import IHistory
+from .magistral.client.pub.PubMeta import PubMeta
+from .magistral.client.IHistory import IHistory
 
-from magistral.client.sub.MagistralConsumer import MagistralConsumer
-from magistral.client.util.aes import AESCipher
+from .magistral.client.sub.MagistralConsumer import MagistralConsumer
+from .magistral.client.util.aes import AESCipher
 import shutil
-from magistral.client.pub.Producer import Producer
+from .magistral.client.pub.Producer import Producer
 import inspect
+import collections
 
 
 class Magistral(IMagistral, IAccessControl, IHistory):
@@ -336,7 +337,7 @@ class Magistral(IMagistral, IAccessControl, IHistory):
                     c = GroupConsumer(threadId, name, self.subKey, bs, group, self.__permissions, self.token, self.cipher, self.uid);
                     self.__consumerMap[group][bs] = c;
             
-            for bs, gc in self.__consumerMap[group].items():
+            for bs, gc in list(self.__consumerMap[group].items()):
                 
                 def asgCallback(assignment, triggerCallbacks = False):
                     
@@ -377,8 +378,8 @@ class Magistral(IMagistral, IAccessControl, IHistory):
         :return: :class: `SubMeta`
         """
                
-        for groupName, consmap in self.__consumerMap.items():
-            for conString, gc in consmap.items():
+        for groupName, consmap in list(self.__consumerMap.items()):
+            for conString, gc in list(consmap.items()):
                 gc.unsubscribe(self.subKey + "." + topic);
                 
                 meta = SubMeta(groupName, topic, channel, conString);
@@ -554,7 +555,7 @@ class Magistral(IMagistral, IAccessControl, IHistory):
         res = mc.historyForTimePeriod(topic, channel, start, end)
         
         if res is not None:
-            if callback is not None: callable(res);
+            if callback is not None: isinstance(res, collections.Callable);
         else: 
             return None;
 
@@ -565,11 +566,11 @@ class Magistral(IMagistral, IAccessControl, IHistory):
         Magistral should be re-instantiated after this
         """
                 
-        for p in self.__producerMap.values():
+        for p in list(self.__producerMap.values()):
             p.close()
         
-        for bsmap in self.__consumerMap.values():
-            for c in bsmap.values(): c.close();  
+        for bsmap in list(self.__consumerMap.values()):
+            for c in list(bsmap.values()): c.close();  
                   
         self.__mqtt.disconnect();
         
